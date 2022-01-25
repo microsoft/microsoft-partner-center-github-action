@@ -1,0 +1,28 @@
+# action.yml
+name: 'Hello World'
+description: 'Greet someone and record the time'
+inputs:
+  token:
+    description: 'Authentication token of Partner Center'
+    required: true
+  offerName:
+    description: 'Offer name'
+    required: true
+  planName:
+    description: 'Plan name'
+    required: true
+  filePath:
+    description: 'Artifact file path'
+    required: true
+  artifactVersion:
+    description: 'Artifact version'
+    required: true
+    default: '1.0.0'
+# outputs:
+#   result:
+#     description: 'result of the action'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.token }} ${{ inputs.offerName }} ${{ inputs.planName }} ${{ inputs.filePath }} ${{ inputs.artifactVersion }}
