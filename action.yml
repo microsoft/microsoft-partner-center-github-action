@@ -1,6 +1,6 @@
 # action.yml
-name: 'Hello World'
-description: 'Greet someone and record the time'
+name: 'Update Partner Center offer artifact'
+description: 'Update Partner Center offer artifact'
 inputs:
   token:
     description: 'Authentication token of Partner Center'
@@ -18,9 +18,6 @@ inputs:
     description: 'Artifact version'
     required: true
     default: '1.0.0'
-# outputs:
-#   result:
-#     description: 'result of the action'
 runs:
   using: 'docker'
   image: 'Dockerfile'
