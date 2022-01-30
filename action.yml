@@ -25,4 +25,8 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - ${{ inputs.token }} ${{ inputs.offerName }} ${{ inputs.planName }} ${{ inputs.filePath }} ${{ inputs.artifactVersion }}
+    - ${{ inputs.token }} 
+    - ${{ inputs.offerName }} 
+    - ${{ inputs.planName }} 
+    - ${{ inputs.filePath }} 
+    - ${{ inputs.artifactVersion }}
