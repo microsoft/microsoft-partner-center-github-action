@@ -2,9 +2,6 @@
 name: 'Update Partner Center offer artifact'
 description: 'Update Partner Center offer artifact'
 inputs:
-  token:
-    description: 'Authentication token of Partner Center'
-    required: true
   offerName:
     description: 'Offer name'
     required: true
@@ -18,12 +15,26 @@ inputs:
     description: 'Artifact version'
     required: true
     default: '1.0.0'
+  clientId:
+    description: "client id"
+    required: true
+    default: 'invalid'
+  secretValue:
+    description: "secret value"
+    required: true
+    default: 'invalid'
+  tenantId:
+    description: "tenant id"
+    required: true
+    default: 'invalid'
 runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - ${{ inputs.token }} 
     - ${{ inputs.offerName }} 
     - ${{ inputs.planName }} 
     - ${{ inputs.filePath }} 
     - ${{ inputs.artifactVersion }}
+    - ${{ inputs.clientId }}
+    - ${{ inputs.secretValue }}
+    - ${{ inputs.tenantId }}

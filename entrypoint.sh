@@ -1,10 +1,12 @@
 #!/bin/bash -l
 
-export token=$1
-export offerName=$2
-export planName=$3
-export filePath=$4
-export artifactVersion=$5
+export offerName=$1
+export planName=$2
+export filePath=$3
+export artifactVersion=$4
+export clientId=$5
+export secretValue=$6
+export tenantId=$7
 export fileName=$(basename ${filePath})
 
 validate_status() {
@@ -17,6 +19,13 @@ validate_status() {
 
 # Get product by name
 get_product_id() {
+    echo "curl --fail -X GET \
+    https://api.partner.microsoft.com/v1.0/ingestion/products \
+    -H \"Authorization: Bearer ${token}\" \
+    -H \"accept: application/json\""
+
+    echo "${token}"
+
     productsOutput=$(curl --fail -X GET \
     https://api.partner.microsoft.com/v1.0/ingestion/products \
     -H "Authorization: Bearer ${token}" \
@@ -282,6 +291,17 @@ update_package_reference() {
     # Validate response
     validate_status "update package reference in draft configuration"
 }
+
+generate_partner_center_token() {
+    curl -o token.json -X POST -d "grant_type=client_credentials" -d "client_id=${clientId}" -d "client_secret=${secretValue}" -d "resource=https://api.partner.microsoft.com" https://login.microsoftonline.com/${tenantId}/oauth2/token 
+    tokenJson=$(curl -X POST -d "grant_type=client_credentials" -d "client_id=${clientId}" -d "client_secret=${secretValue}" -d "resource=https://api.partner.microsoft.com" https://login.microsoftonline.com/${tenantId}/oauth2/token)
+    echo $tokenJson
+    token=$(echo ${tokenJson} | jq -r '.access_token')
+    echo $token
+    export token=$token
+}
+
+generate_partner_center_token
 
 get_product_id
 
