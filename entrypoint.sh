@@ -24,8 +24,6 @@ get_product_id() {
     -H \"Authorization: Bearer ${token}\" \
     -H \"accept: application/json\""
 
-    echo "${token}"
-
     productsOutput=$(curl --fail -X GET \
     https://api.partner.microsoft.com/v1.0/ingestion/products \
     -H "Authorization: Bearer ${token}" \
@@ -295,9 +293,7 @@ update_package_reference() {
 generate_partner_center_token() {
     curl -o token.json -X POST -d "grant_type=client_credentials" -d "client_id=${clientId}" -d "client_secret=${secretValue}" -d "resource=https://api.partner.microsoft.com" https://login.microsoftonline.com/${tenantId}/oauth2/token 
     tokenJson=$(curl -X POST -d "grant_type=client_credentials" -d "client_id=${clientId}" -d "client_secret=${secretValue}" -d "resource=https://api.partner.microsoft.com" https://login.microsoftonline.com/${tenantId}/oauth2/token)
-    echo $tokenJson
     token=$(echo ${tokenJson} | jq -r '.access_token')
-    echo $token
     export token=$token
 }
 
