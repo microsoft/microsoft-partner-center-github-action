@@ -1,65 +1,33 @@
-# Azure Partner center GitHub action
+# Project
 
-This action update the artifact of a plan within the Solution Template offer.
+> This repo has been populated by an initial template to help get you started. Please
+> make sure to update the content to build a great experience for community-building.
 
-## Prerequisites
+As the maintainer of this project, please make a few updates:
 
-To have the action works, you will need to setup three repository secrets for your pipeline(you can also pass them as parameters but it is not recommended):
+- Improving this README.MD file to provide a great experience
+- Updating SUPPORT.MD with content about this project's support experience
+- Understanding the security reporting process in SECURITY.MD
+- Remove this section from the README
 
-* CLIENT_ID: Client ID for an Azure AD application.
-* SECRET_VALUE: Secret value of the application.
-* TENANT_ID: Tenant ID you'd like to run pipeline against.
+## Contributing
 
-Here are the steps to get those credentials:
+This project welcomes contributions and suggestions.  Most contributions require you to agree to a
+Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
+the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
 
-1. [Complete prerequisites for using the Partner Center submission API](https://learn.microsoft.com/en-us/azure/marketplace/azure-app-apis#how-to-associate-an-azure-ad-application-with-your-partner-center-account).
+When you submit a pull request, a CLA bot will automatically determine whether you need to provide
+a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
+provided by the bot. You will only need to do this once across all repos using our CLA.
 
-1. [Quickstart: Register an application with the Microsoft identity platform](https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app#changing-the-application-registration-to-support-multi-tenant)
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
+For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
+contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-1. [Associate an existing Azure AD tenant with your Partner Center account](https://learn.microsoft.com/en-us/windows/apps/publish/partner-center/associate-existing-azure-ad-tenant-with-partner-center-account).
+## Trademarks
 
-## Inputs
-
-### `offerName`
-
-**Required** The name of the offer.
-
-### `planName`
-
-**Required** The name of the plan.
-
-### `filePath`
-
-**Required** The path to the artifact(ZIP file).
-
-### `artifactVersion`
-
-**Required** The new version of the artifact.
-
-### `clientId`
-
-**Required** Client ID for an Azure AD application.
-
-### `secretValue`
-
-**Required** Secret value of the application.
-
-### `tenantId`
-
-**Required** Tenant ID you'd like to run pipeline against.
-
-## Outputs
-
-## Example usage
-
-```terminal
-uses: zhengchang907/microsoft-partner-center-action@v1
-with:
-  offerName: offerName
-  planName: planName
-  filePath: filePath
-  artifactVersion: artifactVersion
-  clientId: clientId
-  secretValue: secretValue
-  tenantId: tenantId
-```
+This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft 
+trademarks or logos is subject to and must follow 
+[Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
+Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
+Any use of third-party trademarks or logos are subject to those third-party's policies.
