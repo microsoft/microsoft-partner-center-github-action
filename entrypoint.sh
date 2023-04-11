@@ -1,13 +1,21 @@
 #!/bin/bash -l
 
-export offerName=$1
-export planName=$2
-export filePath=$3
-export artifactVersion=$4
-export clientId=$5
-export secretValue=$6
-export tenantId=$7
+export clientId=$1
+export secretValue=$2
+export tenantId=$3
+export offerName=$4
+export planName=$5
+export offerType=$6
+export filePath=$7
+export artifactVersion=$8
+export imageVersionNumber=${9}
+export imageType=${10}
+export osDiskSasUrl=${11}
+export dataDiskSasUrl=${12}
+export operatingSystemFamily=${13}
+export operatingSystemType=${14}
 export fileName=$(basename ${filePath})
+
 
 validate_status() {
     if [ $? -ne 0 ]; then
@@ -17,8 +25,10 @@ validate_status() {
     fi
 }
 
+############ Application Offer methods start #################
+
 # Get product by name
-get_product_id() {
+application_get_product_id() {
     echo "curl --fail -X GET \
     https://api.partner.microsoft.com/v1.0/ingestion/products \
     -H \"Authorization: Bearer ${token}\" \
@@ -75,7 +85,7 @@ get_product_id() {
 }
 
 # Get variantId by plan name
-get_variant_id() {
+application_get_variant_id() {
     variantId=""
     variantsOutput=$(curl --fail -X GET \
     https://api.partner.microsoft.com/v1.0/ingestion/products/${productId}/variants \
@@ -96,7 +106,7 @@ get_variant_id() {
 }
 
 # Get draft instance id by variantId
-get_draft_instance_id() {
+application_get_draft_instance_id() {
     echo "Get draft instance id by variantId"
     draftInstanceId=""
     instancesOutput=$(curl --fail -X GET \
@@ -118,7 +128,7 @@ get_draft_instance_id() {
 }
 
 # Create a new package request body
-generateNewPackageRequestBody()
+application_generateNewPackageRequestBody()
 {
     cat <<EOF
 {
@@ -128,13 +138,13 @@ generateNewPackageRequestBody()
 EOF
 }
 
-create_new_package() {
+application_create_new_package() {
     packageInfoOutput=$(curl --fail -X POST \
     https://api.partner.microsoft.com/v1.0/ingestion/products/${productId}/packages \
     -H "Authorization: Bearer ${token}" \
     -H "accept: application/json" \
     -H "Content-Type: application/json" \
-    -d "$(generateNewPackageRequestBody)")
+    -d "$(application_generateNewPackageRequestBody)")
 
     validate_status "Create new artifact upload task"
 
@@ -149,7 +159,7 @@ create_new_package() {
 }
 
 # Upload file
-upload_artifact() {
+application_upload_artifact() {
     echo "upload artifact starts" >&2
     dateNow=$(date -Ru | sed 's/\+0000/GMT/')
     azcliVersion="2018-03-28"
@@ -167,7 +177,7 @@ upload_artifact() {
 }
 
 # Change new package state request body
-generateUploadedPackageRequestBody()
+application_generateUploadedPackageRequestBody()
 {
     cat <<EOF
 {
@@ -182,21 +192,21 @@ EOF
 }
 
 # Change package state to Uploaded
-update_package_state_to_uploaded() {
+application_update_package_state_to_uploaded() {
     echo "https://api.partner.microsoft.com/v1.0/ingestion/products/${productId}/packages/${packageId}"
-    echo $(generateUploadedPackageRequestBody)
+    echo $(application_generateUploadedPackageRequestBody)
     packageInfoOutput=$(curl --fail -X PUT \
     -H "Authorization: Bearer ${token}" \
     -H "accept: application/json" \
     -H "Content-Type: application/json" \
-    -d "$(generateUploadedPackageRequestBody)" \
+    -d "$(application_generateUploadedPackageRequestBody)" \
     https://api.partner.microsoft.com/v1.0/ingestion/products/${productId}/packages/${packageId})
 
     validate_status "update package state to Uploaded"
 }
 
 # wait for package being processed
-wait_for_package() {
+application_wait_for_package() {
     # check if package state is Processed, retry when it is InProcessing, exit when it is ProcessFailed
     attempt=0
     state="InProcessing"
@@ -239,7 +249,7 @@ wait_for_package() {
 
 
 # Get package draft configuration
-get_package_draft_config() {
+application_get_package_draft_config() {
     packageConfigurationOutput=$(curl --fail -X GET \
     "https://api.partner.microsoft.com/v1.0/ingestion/products/${productId}/packageConfigurations/getByInstanceID(instanceID=${draftInstanceId})" \
     -H "Authorization: Bearer ${token}" \
@@ -258,7 +268,7 @@ get_package_draft_config() {
 }
 
 # Change update package reference
-generateUpdatePackageReferenceRequestBody()
+application_generateUpdatePackageReferenceRequestBody()
 {
     cat <<EOF
 {
@@ -276,43 +286,170 @@ EOF
 }
 
 # Update package reference
-update_package_reference() {
-    echo "Update package reference $(generateUpdatePackageReferenceRequestBody)" >&2
+application_update_package_reference() {
+    echo "Update package reference $(application_generateUpdatePackageReferenceRequestBody)" >&2
     curl --fail -X PUT \
     "https://api.partner.microsoft.com/v1.0/ingestion/products/${productId}/packageconfigurations/${configurationId}" \
     -H "Authorization: Bearer ${token}" \
     -H "accept: application/json" \
     -H "Content-Type: application/json" \
     -H "If-Match: ${dataEtag}" \
-    -d "$(generateUpdatePackageReferenceRequestBody)"
+    -d "$(application_generateUpdatePackageReferenceRequestBody)"
 
     # Validate response
     validate_status "update package reference in draft configuration"
 }
 
-generate_partner_center_token() {
-    curl -o token.json -X POST -d "grant_type=client_credentials" -d "client_id=${clientId}" -d "client_secret=${secretValue}" -d "resource=https://api.partner.microsoft.com" https://login.microsoftonline.com/${tenantId}/oauth2/token 
+application_generate_partner_center_token() {
     tokenJson=$(curl -X POST -d "grant_type=client_credentials" -d "client_id=${clientId}" -d "client_secret=${secretValue}" -d "resource=https://api.partner.microsoft.com" https://login.microsoftonline.com/${tenantId}/oauth2/token)
     token=$(echo ${tokenJson} | jq -r '.access_token')
     export token=$token
 }
 
-generate_partner_center_token
+############ Application Offer methods end #################
 
-get_product_id
+############ VM Offer methods start #################
+vm_generate_partner_center_token() {
+    echo "Start generating Partner Center token."
+    tokenJson=$(curl --fail -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "grant_type=client_credentials&client_id=${clientId}&client_secret=${secretValue}&resource=https://graph.microsoft.com" https://login.microsoftonline.com/${tenantId}/oauth2/token)
+    validate_status "generate partner center token"
+    token=$(echo ${tokenJson} | jq -r '.access_token')
+    export token=$token
+    echo "Partner Center token generated."
+}
 
-get_variant_id
+vm_get_product_durable_id() {
+    echo "Start getting product durable ID by offer name."
+    productJson=$(curl --fail -X GET "https://graph.microsoft.com/rp/product-ingestion/product?externalId=${offerName}" -H "Authorization: Bearer ${token}")
+    validate_status "get product duration ID"
+    productDurableId=$(echo ${productJson} | jq -r '.value[0].id')
+    echo "Product durable ID got."
+}
 
-get_draft_instance_id
+vm_get_plan_durable_id() {
+    echo "Start getting plan durable ID by plan name."
+    planJson=$(curl --fail -X GET "https://graph.microsoft.com/rp/product-ingestion/plan?product=${productDurableId}&externalId=${planName}" -H "Authorization: Bearer ${token}")
+    validate_status "get plan duration ID"
+    planDurableId=$(echo ${planJson} | jq -r '.value[0].id')
+    echo "Plan durable ID got."
+}
 
-create_new_package
+vm_get_all_tech_configurations() {
+    echo "Start getting all technical configurations under the plan."
+    IFS='/' read -r -a productArray <<< "$productDurableId"
+    productIdWithoutPrefix="${productArray[1]}"
+    IFS='/' read -r -a planArray <<< "$planDurableId"
+    planIdWithoutPrefix="${planArray[2]}"
+    techConfigJson=$(curl --fail -X GET "https://graph.microsoft.com/rp/product-ingestion/virtual-machine-plan-technical-configuration/${productIdWithoutPrefix}/${planIdWithoutPrefix}" -H "Authorization: Bearer ${token}")
+    validate_status "get all technical configurations"
+    echo "All technical configurations under the plan got."
+}
 
-upload_artifact
+vm_get_all_current_all_image_versions() {
+    imageVersions=$(echo ${techConfigJson} | jq -r '.vmImageVersions')
+}
 
-update_package_state_to_uploaded
+vm_applend_new_draft_tech_configuration() {
+    echo "Start updating technical configurations."
+    # Mark existing draft as delete
+    imageVersionsFiltered=$(echo ${imageVersions} | jq -r 'map(if .lifecycleState == "deprecated" then . else .lifecycleState = "deleted" end)')
+    # Append new draft image version
+    imageVersionsAppended=$(echo ${imageVersionsFiltered} | jq --arg vNum "${imageVersionNumber}" --arg type "${imageType}" --arg osUrl "${osDiskSasUrl}" --arg dataUrl "${dataDiskSasUrl}" '.|=.+[{"versionNumber":$vNum,"vmImages":[{"imageType":$type,"source":{"sourceType":"sasUri","osDisk":{"uri":$osUrl},"dataDisks":[{"lunNumber":0,"uri":$dataUrl}]}}]}]')
+    # Put things together to form the reqeust data
+    requestData={\"\$schema\":\"https://product-ingestion.azureedge.net/schema/configure/2022-03-01-preview2\",\"resources\":[{\"\$schema\":\"https://product-ingestion.azureedge.net/schema/virtual-machine-plan-technical-configuration/2022-03-01-preview3\",\"product\":{\"externalId\":\"${offerName}\"},\"plan\":{\"externalId\":\"${planName}\"},\"operatingSystem\":{\"family\":\"${operatingSystemFamily}\",\"type\":\"${operatingSystemType}\"},\"skus\":[{\"imageType\":\"${imageType}\",\"skuId\":\"${planName}\"}],\"vmImageVersions\":${imageVersionsAppended}}]}
+    requestDataCompact=$(echo $requestData | jq -c)
+    # Post to Partner Center
+    response=$(curl --fail -X POST 'https://graph.microsoft.com/rp/product-ingestion/configure' -H "Content-Type: application/json" -H "accept: application/json" -H "Authorization: Bearer ${token}" -d $requestDataCompact)
+    validate_status "update configuration, add new draft technical configuration"
+    # Extract job Id
+    jobId=$(echo $response | jq -r '.jobId')
+    echo "Technical configurations updated."
+}
 
-wait_for_package
+vm_check_configuration_status() {
+    # check the job status
+    attempt=0
+    state="pending"
+    while [ $state = "pending" ] && [ $attempt -le 10 ]; do
+        echo "wait for the job to be processed" >&2
+        jobStatusOutput=$(curl --fail -X GET \
+            "https://graph.microsoft.com/rp/product-ingestion/configure/${jobId}/status" \
+            -H "Content-Type: application/json" \
+            -H "accept: application/json" \
+            -H "Authorization: Bearer ${token}" | jq .)
 
-get_package_draft_config
+        validate_status "get job state"
 
-update_package_reference
+        jobStatusInfo=$(echo $jobStatusOutput | jq .)
+        echo "current job status is: " >&2
+        echo $jobStatusInfo | jq . >&2
+
+        result=$(echo $jobStatusInfo | jq -r '.jobResult')
+
+        # if state is failed exit 1
+        if [ $result = "failed" ]; then
+            echo "Error happens when processing job" >&2
+            exit 1
+        elif [ $result = "cancelled" ]; then
+            echo "Job is cancelled" >&2
+            exit 1
+        elif [ $result = "pending" ]; then
+            echo "Job is under processing" >&2
+            attempt=$((attempt+1))
+            sleep 10s
+        elif [ $result = "succeeded" ]; then
+            echo "Job processing succeeded" >&2
+            break
+        fi
+    done
+
+    if [ $result != "succeeded" ]; then
+        echo "Job state is: ${result}, something could went wrong" >&2
+        exit 1
+    else
+        echo "Job processing succeeded"
+    fi
+
+}
+
+############ VM Offer methods end #################
+
+if [ $offerType == "application_offer" ]; then
+    application_generate_partner_center_token
+
+    application_get_product_id
+
+    application_get_variant_id
+
+    application_get_draft_instance_id
+
+    application_create_new_package
+
+    application_upload_artifact
+
+    application_update_package_state_to_uploaded
+
+    application_wait_for_package
+
+    application_get_package_draft_config
+
+    application_update_package_reference
+elif [ $offerType == "vm_image_offer" ]; then
+    vm_generate_partner_center_token
+
+    vm_get_product_durable_id
+
+    vm_get_plan_durable_id
+
+    vm_get_all_tech_configurations
+
+    vm_get_all_current_all_image_versions
+
+    vm_applend_new_draft_tech_configuration
+
+    vm_check_configuration_status
+else
+    echo "Unsupported offer type" >&2
+    exit 1
+fi
+

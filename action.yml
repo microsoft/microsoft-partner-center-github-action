@@ -5,15 +5,18 @@ inputs:
   offerName:
     description: 'Offer name'
     required: true
+    default: 'invalid'
   planName:
     description: 'Plan name'
     required: true
+    default: 'invalid'
   filePath:
     description: 'Artifact file path'
-    required: true
+    required: false
+    default: 'invalid'
   artifactVersion:
     description: 'Artifact version'
-    required: true
+    required: false
     default: '1.0.0'
   clientId:
     description: "client id"
@@ -27,14 +30,49 @@ inputs:
     description: "tenant id"
     required: true
     default: 'invalid'
+  offerType:
+    description: "offer type"
+    required: true
+    default: 'invalid'
+  imageVersionNumber:
+    description: "image version number"
+    required: false
+    default: 'invalid'
+  imageType:
+    description: "image type"
+    required: false
+    default: 'invalid'
+  osDiskSasUrl:
+    description: "OS Disk SAS URL"
+    required: false
+    default: 'invalid'
+  dataDiskSasUrl:
+    description: "Data Disk SAS URL"
+    required: false
+    default: 'invalid'
+  operatingSystemFamily:
+    description: "The OS family name"
+    required: false
+    default: 'invalid'
+  operatingSystemType:
+    description: "The OS type name"
+    required: false
+    default: 'invalid'
 runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - ${{ inputs.offerName }} 
-    - ${{ inputs.planName }} 
-    - ${{ inputs.filePath }} 
-    - ${{ inputs.artifactVersion }}
     - ${{ inputs.clientId }}
     - ${{ inputs.secretValue }}
     - ${{ inputs.tenantId }}
+    - ${{ inputs.offerName }} 
+    - ${{ inputs.planName }} 
+    - ${{ inputs.offerType }}
+    - ${{ inputs.filePath }} 
+    - ${{ inputs.artifactVersion }}
+    - ${{ inputs.imageVersionNumber }}
+    - ${{ inputs.imageType }}
+    - ${{ inputs.osDiskSasUrl }}
+    - ${{ inputs.dataDiskSasUrl }}
+    - ${{ inputs.operatingSystemFamily }}
+    - ${{ inputs.operatingSystemType }}
