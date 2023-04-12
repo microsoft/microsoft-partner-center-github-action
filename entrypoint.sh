@@ -144,7 +144,7 @@ application_create_new_package() {
     -H "Authorization: Bearer ${token}" \
     -H "accept: application/json" \
     -H "Content-Type: application/json" \
-    -d "$(generateNewPackageRequestBody)")
+    -d "$(application_generateNewPackageRequestBody)")
 
     validate_status "Create new artifact upload task"
 
@@ -194,12 +194,12 @@ EOF
 # Change package state to Uploaded
 application_update_package_state_to_uploaded() {
     echo "https://api.partner.microsoft.com/v1.0/ingestion/products/${productId}/packages/${packageId}"
-    echo $(generateUploadedPackageRequestBody)
+    echo $(application_generateUploadedPackageRequestBody)
     packageInfoOutput=$(curl --fail -X PUT \
     -H "Authorization: Bearer ${token}" \
     -H "accept: application/json" \
     -H "Content-Type: application/json" \
-    -d "$(generateUploadedPackageRequestBody)" \
+    -d "$(application_generateUploadedPackageRequestBody)" \
     https://api.partner.microsoft.com/v1.0/ingestion/products/${productId}/packages/${packageId})
 
     validate_status "update package state to Uploaded"
