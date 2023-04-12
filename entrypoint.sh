@@ -435,19 +435,19 @@ if [ $offerType == "application_offer" ]; then
 
     application_update_package_reference
 elif [ $offerType == "vm_image_offer" ]; then
-    generate_partner_center_token
+    vm_generate_partner_center_token
 
-    get_product_durable_id
+    vm_get_product_durable_id
 
-    get_plan_durable_id
+    vm_get_plan_durable_id
 
-    get_all_tech_configurations
+    vm_get_all_tech_configurations
 
-    get_all_current_all_image_versions
+    vm_get_all_current_all_image_versions
 
-    applend_new_draft_tech_configuration
+    vm_applend_new_draft_tech_configuration
 
-    check_configuration_status
+    vm_check_configuration_status
 else
     echo "Unsupported offer type" >&2
     exit 1
