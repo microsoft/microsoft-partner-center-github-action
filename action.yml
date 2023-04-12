@@ -59,14 +59,14 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - ${{ inputs.offerName }} 
-    - ${{ inputs.planName }} 
-    - ${{ inputs.filePath }} 
-    - ${{ inputs.artifactVersion }}
     - ${{ inputs.clientId }}
     - ${{ inputs.secretValue }}
     - ${{ inputs.tenantId }}
+    - ${{ inputs.offerName }} 
+    - ${{ inputs.planName }} 
     - ${{ inputs.offerType }}
+    - ${{ inputs.filePath }} 
+    - ${{ inputs.artifactVersion }}
     - ${{ inputs.imageVersionNumber }}
     - ${{ inputs.imageType }}
     - ${{ inputs.osDiskSasUrl }}
