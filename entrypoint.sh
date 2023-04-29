@@ -352,7 +352,7 @@ vm_get_all_current_all_image_versions() {
 vm_applend_new_draft_tech_configuration() {
     echo "Start updating technical configurations."
     # Mark existing draft as delete
-    imageVersionsFiltered=$(echo ${imageVersions} | jq -r 'map(if .lifecycleState == "deprecated" then . else .lifecycleState = "deleted" end)')
+    imageVersionsFiltered=$(echo ${imageVersions} | jq -r 'map(if .lifecycleState == "generallyAvailable" then .lifecycleState = "deleted" else . end)')
     # Append new draft image version
     imageVersionsAppended=$(echo ${imageVersionsFiltered} | jq --arg vNum "${imageVersionNumber}" --arg type "${imageType}" --arg osUrl "${osDiskSasUrl}" --arg dataUrl "${dataDiskSasUrl}" '.|=.+[{"versionNumber":$vNum,"vmImages":[{"imageType":$type,"source":{"sourceType":"sasUri","osDisk":{"uri":$osUrl},"dataDisks":[{"lunNumber":0,"uri":$dataUrl}]}}]}]')
     # Put things together to form the reqeust data
