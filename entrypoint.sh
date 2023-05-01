@@ -14,7 +14,14 @@ export osDiskSasUrl=${11}
 export dataDiskSasUrl=${12}
 export operatingSystemFamily=${13}
 export operatingSystemType=${14}
+export verboseDebugging=${15}
 export fileName=$(basename ${filePath})
+
+if [ $verboseDebugging == "true" ]; then
+    verbose=0
+else
+    verbose=1
+fi
 
 
 validate_status() {
@@ -92,6 +99,10 @@ application_get_variant_id() {
     -H "Authorization: Bearer ${token}" \
     -H "accept: application/json")
 
+    if [ $verbose == 0 ]; then
+        echo "debug: variantsOutput: $variantsOutput" >&2
+    fi
+    
     validate_status "Get plan list"
 
     variants=$(echo $variantsOutput | jq .)
@@ -113,6 +124,10 @@ application_get_draft_instance_id() {
     "https://api.partner.microsoft.com/v1.0/ingestion/products/${productId}/branches/getByModule(module=Package)" \
     -H "Authorization: Bearer ${token}" \
     -H "accept: application/json")
+
+    if [ $verbose == 0 ]; then
+        echo "debug: instancesOutput: $instancesOutput" >&2
+    fi
 
     validate_status "Get draft instances"
 
@@ -146,6 +161,10 @@ application_create_new_package() {
     -H "Content-Type: application/json" \
     -d "$(application_generateNewPackageRequestBody)")
 
+    if [ $verbose == 0 ]; then
+        echo "debug: packageInfoOutput: $packageInfoOutput" >&2
+    fi
+
     validate_status "Create new artifact upload task"
 
     packageInfo=$(echo $packageInfoOutput | jq .)
@@ -163,6 +182,14 @@ application_upload_artifact() {
     echo "upload artifact starts" >&2
     dateNow=$(date -Ru | sed 's/\+0000/GMT/')
     azcliVersion="2018-03-28"
+    if [ $verbose == 0 ]; then
+        echo curl --fail -X PUT -H "Content-Type: application/octet-stream" \
+        -H "x-ms-date: ${dateNow}" \
+        -H "x-ms-version: ${azcliVersion}" \
+        -H "x-ms-blob-type: BlockBlob" \
+        --data-binary "@${filePath}" \
+        "${fileSasUri}"
+    fi
 
     curl --fail -X PUT -H "Content-Type: application/octet-stream" \
     -H "x-ms-date: ${dateNow}" \
@@ -217,6 +244,10 @@ application_wait_for_package() {
         -H "Authorization: Bearer ${token}" \
         -H 'accept: application/json' | jq .)
 
+        if [ $verbose == 0 ]; then
+            echo "debug: packageInfoOutput: $packageInfoOutput" >&2
+        fi
+
         validate_status "get package state"
 
         packageInfo=$(echo $packageInfoOutput | jq .)
@@ -255,6 +286,10 @@ application_get_package_draft_config() {
     -H "Authorization: Bearer ${token}" \
     -H "accept: application/json" | jq .)
 
+    if [ $verbose == 0 ]; then
+        echo "debug: packageConfigurationOutput: $packageConfigurationOutput" >&2
+    fi
+
     validate_status "get draft configuration"
 
     packageConfiguration=$(echo $packageConfigurationOutput | jq .)
@@ -288,6 +323,16 @@ EOF
 # Update package reference
 application_update_package_reference() {
     echo "Update package reference $(application_generateUpdatePackageReferenceRequestBody)" >&2
+    if [ $verbose == 0 ]; then
+        echo curl --fail -X PUT \
+            "https://api.partner.microsoft.com/v1.0/ingestion/products/${productId}/packageconfigurations/${configurationId}" \
+            -H "Authorization: Bearer ${token}" \
+            -H "accept: application/json" \
+            -H "Content-Type: application/json" \
+            -H "If-Match: ${dataEtag}" \
+            -d "$(application_generateUpdatePackageReferenceRequestBody)"
+    fi
+
     curl --fail -X PUT \
     "https://api.partner.microsoft.com/v1.0/ingestion/products/${productId}/packageconfigurations/${configurationId}" \
     -H "Authorization: Bearer ${token}" \
@@ -347,19 +392,47 @@ vm_get_all_tech_configurations() {
 
 vm_get_all_current_all_image_versions() {
     imageVersions=$(echo ${techConfigJson} | jq -r '.vmImageVersions')
+    if [ $verbose == 0 ]; then
+        echo "debug: imageVersions: $imageVersions" >&2
+    fi
 }
 
 vm_applend_new_draft_tech_configuration() {
     echo "Start updating technical configurations."
     # Mark existing draft as delete
+
+    if [ $verbose == 0 ]; then
+        echo "debug: imageVersions: $imageVersions" >&2
+    fi
+
     imageVersionsFiltered=$(echo ${imageVersions} | jq -r 'map(if .lifecycleState == "generallyAvailable" then .lifecycleState = "deleted" else . end)')
+
+    if [ $verbose == 0 ]; then
+        echo "debug: imageVersionsFiltered: $imageVersionsFiltered" >&2
+    fi
+
     # Append new draft image version
     imageVersionsAppended=$(echo ${imageVersionsFiltered} | jq --arg vNum "${imageVersionNumber}" --arg type "${imageType}" --arg osUrl "${osDiskSasUrl}" --arg dataUrl "${dataDiskSasUrl}" '.|=.+[{"versionNumber":$vNum,"vmImages":[{"imageType":$type,"source":{"sourceType":"sasUri","osDisk":{"uri":$osUrl},"dataDisks":[{"lunNumber":0,"uri":$dataUrl}]}}]}]')
+
+    if [ $verbose == 0 ]; then
+        echo "debug: imageVersionsAppended: $imageVersionsAppended" >&2
+    fi
+
     # Put things together to form the reqeust data
     requestData={\"\$schema\":\"https://product-ingestion.azureedge.net/schema/configure/2022-03-01-preview2\",\"resources\":[{\"\$schema\":\"https://product-ingestion.azureedge.net/schema/virtual-machine-plan-technical-configuration/2022-03-01-preview3\",\"product\":{\"externalId\":\"${offerName}\"},\"plan\":{\"externalId\":\"${planName}\"},\"operatingSystem\":{\"family\":\"${operatingSystemFamily}\",\"type\":\"${operatingSystemType}\"},\"skus\":[{\"imageType\":\"${imageType}\",\"skuId\":\"${planName}\"}],\"vmImageVersions\":${imageVersionsAppended}}]}
+
+    if [ $verbose == 0 ]; then
+        echo "debug: requestData: $requestData" >&2
+    fi
+
     requestDataCompact=$(echo $requestData | jq -c)
     # Post to Partner Center
     response=$(curl --fail -X POST 'https://graph.microsoft.com/rp/product-ingestion/configure' -H "Content-Type: application/json" -H "accept: application/json" -H "Authorization: Bearer ${token}" -d $requestDataCompact)
+
+    if [ $verbose == 0 ]; then
+        echo "debug: response: $response" >&2
+    fi
+
     validate_status "update configuration, add new draft technical configuration"
     # Extract job Id
     jobId=$(echo $response | jq -r '.jobId')
@@ -377,6 +450,10 @@ vm_check_configuration_status() {
             -H "Content-Type: application/json" \
             -H "accept: application/json" \
             -H "Authorization: Bearer ${token}" | jq .)
+
+        if [ $verbose == 0 ]; then
+            echo "debug: jobStatusOutput: $jobStatusOutput" >&2
+        fi
 
         validate_status "get job state"
 
