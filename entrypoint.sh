@@ -46,7 +46,7 @@ application_get_product_id() {
     echo $products | jq . >&2
 
     nextProductsLink=$(echo ${products} | jq -r '.nextLink')
-    productId=$(echo ${products} | jq -r --arg offerName $offerName '.value | .[] | select(.name==$offerName) | .id')
+    productId=$(echo ${products} | jq -r --arg offerName "$offerName" '.value | .[] | select(.name==$offerName) | .id')
 
     echo "offer finding result in first page: " $nextProductsLink $productId >&2
 
@@ -67,7 +67,7 @@ application_get_product_id() {
         echo $products | jq . >&2
         
         nextProductsLink=$(echo ${products} | jq -r '.nextLink')
-        productId=$(echo ${products} | jq -r --arg offerName $offerName '.value | .[] | select(.name==$offerName) | .id')
+        productId=$(echo ${products} | jq -r --arg offerName "$offerName" '.value | .[] | select(.name==$offerName) | .id')
 
         echo "offer finding result in next page: " $nextProductsLink $productId >&2
 
@@ -98,7 +98,7 @@ application_get_variant_id() {
     echo "all plans under the offer: " >&2
     echo $variants | jq . >&2
 
-    variantId=$(echo ${variants} | jq -r --arg planName $planName '.value | .[] | select(.friendlyName==$planName) | .id')
+    variantId=$(echo ${variants} | jq -r --arg planName "$planName" '.value | .[] | select(.friendlyName==$planName) | .id')
 
     validate_status "Get plan id by name"
 

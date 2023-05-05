@@ -36,11 +36,11 @@ Here are the steps to get those credentials:
 
 ### `offerName`
 
-**Required** The name of the offer.
+**Required** The name of the offer if `offerType` is `application_offer`. The id of the offer if `offerType` is `vm_image_offer`.
 
 ### `planName`
 
-**Required** The name of the plan.
+**Required** The name of the plan if `offerType` is `application_offer`. The id of the plan if `offerType` is `vm_image_offer`.
 
 ### `offerType`
 
@@ -100,8 +100,8 @@ with:
 ```terminal
 uses: microsoft/microsoft-partner-center-github-action@v1
 with:
-  offerName: offerName
-  planName: planName
+  offerName: offerId
+  planName: planId
   clientId: clientId
   secretValue: secretValue
   tenantId: tenantId
