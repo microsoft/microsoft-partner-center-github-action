@@ -58,6 +58,10 @@ inputs:
     description: "The OS type name"
     required: false
     default: 'invalid'
+  verbose:
+    description: "Turn on verbose debugging output"
+    required: false
+    default: 'false'
 runs:
   using: 'docker'
   image: 'Dockerfile'
@@ -76,3 +80,4 @@ runs:
     - ${{ inputs.dataDiskSasUrl }}
     - ${{ inputs.operatingSystemFamily }}
     - ${{ inputs.operatingSystemType }}
+    - ${{ inputs.verbose }}
