@@ -2,12 +2,12 @@
 name: 'Update Partner Center offer artifact'
 description: 'Update Partner Center offer artifact'
 inputs:
-  offerName:
-    description: 'Offer name'
+  offerId:
+    description: 'Offer id'
     required: true
     default: 'invalid'
-  planName:
-    description: 'Plan name'
+  planId:
+    description: 'Plan id'
     required: true
     default: 'invalid'
   filePath:
@@ -69,8 +69,8 @@ runs:
     - ${{ inputs.clientId }}
     - ${{ inputs.secretValue }}
     - ${{ inputs.tenantId }}
-    - ${{ inputs.offerName }} 
-    - ${{ inputs.planName }} 
+    - ${{ inputs.offerId }} 
+    - ${{ inputs.planId }} 
     - ${{ inputs.offerType }}
     - ${{ inputs.filePath }} 
     - ${{ inputs.artifactVersion }}

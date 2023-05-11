@@ -1,0 +1,68 @@
+name: update vm offer
+
+on:
+  workflow_dispatch:
+    inputs:
+      offerId:
+        description: 'Offer id'
+        required: true
+      planId:
+        description: 'Plan id'
+        required: true
+      imageVersionNumber:
+        description: 'The new version of the image'
+        required: true
+      osDiskSasUrl:
+        description: 'The OS Disk SAS URL'
+        required: true
+      dataDiskSasUrl:
+        description: 'The Data Disk SAS URL'
+        required: true
+      imageType:
+        description: 'The type of the image'
+        required: true
+        default: 'x64Gen1'
+      operatingSystemFamily:
+        description: 'The OS family'
+        required: true
+        default: 'linux'
+      operatingSystemType:
+        description: 'The OS type'
+        required: true
+        default: 'redHat'
+
+env:
+    offerId: ${{ github.event.inputs.offerId }}
+    planId: ${{ github.event.inputs.planId }}
+    imageVersionNumber: ${{ github.event.inputs.imageVersionNumber }}
+    osDiskSasUrl: ${{ github.event.inputs.osDiskSasUrl }}
+    dataDiskSasUrl: ${{ github.event.inputs.dataDiskSasUrl }}
+    imageType: ${{ github.event.inputs.imageType }}
+    operatingSystemFamily: ${{ github.event.inputs.operatingSystemFamily }}
+    operatingSystemType: ${{ github.event.inputs.operatingSystemType }}
+    clientId: ${{ secrets.CLIENT_ID }}
+    secretValue: ${{ secrets.SECRET_VALUE }}
+    tenantId: ${{ secrets.TENANT_ID }}
+    offerType: "vm_image_offer"
+
+jobs:
+  update_artifact_job:
+    runs-on: ubuntu-latest
+    name: A job to update Partner Center vm offer artifact
+    steps:
+      - name: Update offer artifact
+        id: update-offer-artifact
+        uses: microsoft/microsoft-partner-center-action@v3
+        with:
+          offerId: ${{ env.offerId }}
+          planId: ${{ env.planId }}
+          imageVersionNumber: ${{ env.imageVersionNumber }}
+          osDiskSasUrl: ${{ env.osDiskSasUrl }}
+          dataDiskSasUrl: ${{ env.dataDiskSasUrl }}
+          imageType: ${{ env.imageType }}
+          operatingSystemFamily: ${{ env.operatingSystemFamily }}
+          operatingSystemType: ${{ env.operatingSystemType }}
+          clientId: ${{ env.clientId }}
+          secretValue: ${{ env.secretValue }}
+          tenantId: ${{ env.tenantId }}
+          offerType: ${{ env.offerType }}
