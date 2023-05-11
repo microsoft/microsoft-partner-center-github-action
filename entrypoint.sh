@@ -3,8 +3,8 @@
 export clientId=$1
 export secretValue=$2
 export tenantId=$3
-export offerName=$4
-export planName=$5
+export offerId=$4
+export planId=$5
 export offerType=$6
 export filePath=$7
 export artifactVersion=$8
@@ -53,7 +53,7 @@ application_get_product_id() {
     echo $products | jq . >&2
 
     nextProductsLink=$(echo ${products} | jq -r '.nextLink')
-    productId=$(echo ${products} | jq -r --arg offerName "$offerName" '.value | .[] | select(.name==$offerName) | .id')
+    productId=$(echo ${products} | jq -r --arg offerId "$offerId" '.value[] | select(.externalIDs[].value == $offerId) | .id')
 
     echo "offer finding result in first page: " $nextProductsLink $productId >&2
 
@@ -74,7 +74,7 @@ application_get_product_id() {
         echo $products | jq . >&2
         
         nextProductsLink=$(echo ${products} | jq -r '.nextLink')
-        productId=$(echo ${products} | jq -r --arg offerName "$offerName" '.value | .[] | select(.name==$offerName) | .id')
+        productId=$(echo ${products} | jq -r --arg offerId "$offerId" '.value[] | select(.externalIDs[].value == $offerId) | .id')
 
         echo "offer finding result in next page: " $nextProductsLink $productId >&2
 
@@ -109,7 +109,7 @@ application_get_variant_id() {
     echo "all plans under the offer: " >&2
     echo $variants | jq . >&2
 
-    variantId=$(echo ${variants} | jq -r --arg planName "$planName" '.value | .[] | select(.friendlyName==$planName) | .id')
+    variantId=$(echo ${variants} | jq -r --arg planId "$planId" '.value | .[] | select(.externalID==$planId) | .id')
 
     validate_status "Get plan id by name"
 
@@ -365,7 +365,7 @@ vm_generate_partner_center_token() {
 
 vm_get_product_durable_id() {
     echo "Start getting product durable ID by offer name."
-    productJson=$(curl --fail -X GET "https://graph.microsoft.com/rp/product-ingestion/product?externalId=${offerName}" -H "Authorization: Bearer ${token}")
+    productJson=$(curl --fail -X GET "https://graph.microsoft.com/rp/product-ingestion/product?externalId=${offerId}" -H "Authorization: Bearer ${token}")
     validate_status "get product duration ID"
     productDurableId=$(echo ${productJson} | jq -r '.value[0].id')
     echo "Product durable ID got."
@@ -373,7 +373,7 @@ vm_get_product_durable_id() {
 
 vm_get_plan_durable_id() {
     echo "Start getting plan durable ID by plan name."
-    planJson=$(curl --fail -X GET "https://graph.microsoft.com/rp/product-ingestion/plan?product=${productDurableId}&externalId=${planName}" -H "Authorization: Bearer ${token}")
+    planJson=$(curl --fail -X GET "https://graph.microsoft.com/rp/product-ingestion/plan?product=${productDurableId}&externalId=${planId}" -H "Authorization: Bearer ${token}")
     validate_status "get plan duration ID"
     planDurableId=$(echo ${planJson} | jq -r '.value[0].id')
     echo "Plan durable ID got."
@@ -419,7 +419,7 @@ vm_applend_new_draft_tech_configuration() {
     fi
 
     # Put things together to form the reqeust data
-    requestData={\"\$schema\":\"https://product-ingestion.azureedge.net/schema/configure/2022-03-01-preview2\",\"resources\":[{\"\$schema\":\"https://product-ingestion.azureedge.net/schema/virtual-machine-plan-technical-configuration/2022-03-01-preview3\",\"product\":{\"externalId\":\"${offerName}\"},\"plan\":{\"externalId\":\"${planName}\"},\"operatingSystem\":{\"family\":\"${operatingSystemFamily}\",\"type\":\"${operatingSystemType}\"},\"skus\":[{\"imageType\":\"${imageType}\",\"skuId\":\"${planName}\"}],\"vmImageVersions\":${imageVersionsAppended}}]}
+    requestData={\"\$schema\":\"https://product-ingestion.azureedge.net/schema/configure/2022-03-01-preview2\",\"resources\":[{\"\$schema\":\"https://product-ingestion.azureedge.net/schema/virtual-machine-plan-technical-configuration/2022-03-01-preview3\",\"product\":{\"externalId\":\"${offerId}\"},\"plan\":{\"externalId\":\"${planId}\"},\"operatingSystem\":{\"family\":\"${operatingSystemFamily}\",\"type\":\"${operatingSystemType}\"},\"skus\":[{\"imageType\":\"${imageType}\",\"skuId\":\"${planId}\"}],\"vmImageVersions\":${imageVersionsAppended}}]}
 
     if [ $verbose == 0 ]; then
         echo "debug: requestData: $requestData" >&2

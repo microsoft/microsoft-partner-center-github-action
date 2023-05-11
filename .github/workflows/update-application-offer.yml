@@ -1,13 +1,13 @@
-name: Test workflow
+name: update application offer
 
 on:
   workflow_dispatch:
     inputs:
-      offerName:
-        description: 'Offer name'
+      offerId:
+        description: 'Offer id'
         required: true
-      planName:
-        description: 'Plan name'
+      planId:
+        description: 'Plan id'
         required: true
       filePath:
         description: 'Artifact file path'
@@ -18,33 +18,29 @@ on:
         default: '1.0.0'
 
 env:
-    offerName: ${{ github.event.inputs.offerName }}
-    planName: ${{ github.event.inputs.planName }}
+    offerId: ${{ github.event.inputs.offerId }}
+    planId: ${{ github.event.inputs.planId }}
     filePath: ${{ github.event.inputs.filePath }}
     artifactVersion: ${{ github.event.inputs.artifactVersion }}
     clientId: ${{ secrets.CLIENT_ID }}
     secretValue: ${{ secrets.SECRET_VALUE }}
     tenantId: ${{ secrets.TENANT_ID }}
+    offerType: 'application_offer'
 
 jobs:
   update_artifact_job:
     runs-on: ubuntu-latest
-    name: A job to update Partner Center offer artifact
+    name: A job to update Partner Center application offer artifact
     steps:
-      - name: Checkout microsoft-partner-center-action
-        uses: actions/checkout@v2
-        with:
-          repository: zhengchang907/microsoft-partner-center-action
-          path: microsoft-partner-center-action
       - name: Update offer artifact
-        id: hello
-        uses: zhengchang907/microsoft-partner-center-action@v1
+        id: update-offer-artifact
+        uses: microsoft/microsoft-partner-center-action@v3
         with:
-          offerName: ${{ env.offerName }}
-          planName: ${{ env.planName }}
+          offerId: ${{ env.offerId }}
+          planId: ${{ env.planId }}
           filePath: ${{ env.filePath }}
           artifactVersion: ${{ env.artifactVersion }}
           clientId: ${{ env.clientId }}
           secretValue: ${{ env.secretValue }}
           tenantId: ${{ env.tenantId }}
-           
+          offerType: ${{ env.offerType }}

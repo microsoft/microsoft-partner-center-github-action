@@ -34,13 +34,13 @@ Here are the steps to get those credentials:
 
 **Required** Tenant ID you'd like to run pipeline against.
 
-### `offerName`
+### `offerId`
 
-**Required** The name of the offer if `offerType` is `application_offer`. The id of the offer if `offerType` is `vm_image_offer`.
+**Required** The id of the offer.
 
-### `planName`
+### `planId`
 
-**Required** The name of the plan if `offerType` is `application_offer`. The id of the plan if `offerType` is `vm_image_offer`.
+**Required** The id of the plan.
 
 ### `offerType`
 
@@ -83,11 +83,12 @@ Here are the steps to get those credentials:
 ## Example usage
 
 ### For Application Offer
+
 ```terminal
-uses: microsoft/microsoft-partner-center-github-action@v1
+uses: microsoft/microsoft-partner-center-github-action@v3
 with:
-  offerName: offerName
-  planName: planName
+  offerId: offerId
+  planId: planId
   filePath: filePath
   artifactVersion: artifactVersion
   clientId: clientId
@@ -97,11 +98,12 @@ with:
 ```
 
 ### For Virtual Machine Offer
+
 ```terminal
-uses: microsoft/microsoft-partner-center-github-action@v1
+uses: microsoft/microsoft-partner-center-github-action@v3
 with:
-  offerName: offerId
-  planName: planId
+  offerId: offerId
+  planId: planId
   clientId: clientId
   secretValue: secretValue
   tenantId: tenantId
