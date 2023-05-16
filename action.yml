@@ -39,7 +39,7 @@ inputs:
     required: false
     default: 'invalid'
   imageType:
-    description: "image type. Valid value x64Gen1."
+    description: "image type. Valid values are x64Gen1, x64Gen2 etc."
     required: false
     default: 'invalid'
   osDiskSasUrl:
