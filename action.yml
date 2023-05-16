@@ -31,7 +31,7 @@ inputs:
     required: true
     default: 'invalid'
   offerType:
-    description: "offer type"
+    description: "offer type. Valid values are vm_image_offer or application_offer"
     required: true
     default: 'invalid'
   imageVersionNumber:
