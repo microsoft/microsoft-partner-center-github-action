@@ -386,6 +386,9 @@ vm_get_all_tech_configurations() {
     IFS='/' read -r -a planArray <<< "$planDurableId"
     planIdWithoutPrefix="${planArray[2]}"
     techConfigJson=$(curl --fail -X GET "https://graph.microsoft.com/rp/product-ingestion/virtual-machine-plan-technical-configuration/${productIdWithoutPrefix}/${planIdWithoutPrefix}" -H "Authorization: Bearer ${token}")
+    if [ $verbose == 0 ]; then
+        echo "debug: techConfigJson: $techConfigJson" >&2
+    fi
     validate_status "get all technical configurations"
     echo "All technical configurations under the plan got."
 }

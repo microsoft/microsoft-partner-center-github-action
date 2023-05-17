@@ -78,6 +78,10 @@ Here are the steps to get those credentials:
 
 **Required for Azure Virtual Machine Offer** The OS type like `redHat`.
 
+### `verbose`
+
+**If and only if `true`, output additional debugging information.
+
 ## Outputs
 
 ## Example usage

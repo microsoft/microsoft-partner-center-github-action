@@ -31,7 +31,7 @@ inputs:
     required: true
     default: 'invalid'
   offerType:
-    description: "offer type"
+    description: "offer type. Valid values are vm_image_offer or application_offer."
     required: true
     default: 'invalid'
   imageVersionNumber:
@@ -39,7 +39,7 @@ inputs:
     required: false
     default: 'invalid'
   imageType:
-    description: "image type"
+    description: "image type. Valid values are x64Gen1, x64Gen2 etc."
     required: false
     default: 'invalid'
   osDiskSasUrl:
@@ -51,11 +51,11 @@ inputs:
     required: false
     default: 'invalid'
   operatingSystemFamily:
-    description: "The OS family name"
+    description: "The OS family name. Valid value linux."
     required: false
     default: 'invalid'
   operatingSystemType:
-    description: "The OS type name"
+    description: "The OS type name. Valid value redHat."
     required: false
     default: 'invalid'
   verbose:
