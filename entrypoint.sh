@@ -408,14 +408,8 @@ vm_applend_new_draft_tech_configuration() {
         echo "debug: imageVersions: $imageVersions" >&2
     fi
 
-    imageVersionsFiltered=$(echo ${imageVersions} | jq -r 'map(if .lifecycleState == "generallyAvailable" then .lifecycleState = "deleted" else . end)')
-
-    if [ $verbose == 0 ]; then
-        echo "debug: imageVersionsFiltered: $imageVersionsFiltered" >&2
-    fi
-
     # Append new draft image version
-    imageVersionsAppended=$(echo ${imageVersionsFiltered} | jq --arg vNum "${imageVersionNumber}" --arg type "${imageType}" --arg osUrl "${osDiskSasUrl}" --arg dataUrl "${dataDiskSasUrl}" '.|=.+[{"versionNumber":$vNum,"vmImages":[{"imageType":$type,"source":{"sourceType":"sasUri","osDisk":{"uri":$osUrl},"dataDisks":[{"lunNumber":0,"uri":$dataUrl}]}}]}]')
+    imageVersionsAppended=$(echo ${imageVersions} | jq --arg vNum "${imageVersionNumber}" --arg type "${imageType}" --arg osUrl "${osDiskSasUrl}" --arg dataUrl "${dataDiskSasUrl}" '.|=.+[{"versionNumber":$vNum,"vmImages":[{"imageType":$type,"source":{"sourceType":"sasUri","osDisk":{"uri":$osUrl},"dataDisks":[{"lunNumber":0,"uri":$dataUrl}]}}]}]')
 
     if [ $verbose == 0 ]; then
         echo "debug: imageVersionsAppended: $imageVersionsAppended" >&2
