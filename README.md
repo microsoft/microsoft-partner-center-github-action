@@ -89,33 +89,33 @@ Here are the steps to get those credentials:
 ### For Application Offer
 
 ```terminal
-uses: microsoft/microsoft-partner-center-github-action@v3
+uses: microsoft/microsoft-partner-center-github-action@v3.1
 with:
   offerId: offerId
   planId: planId
+  offerType: 'application_offer'
   filePath: filePath
   artifactVersion: artifactVersion
   clientId: clientId
   secretValue: secretValue
   tenantId: tenantId
-  offerType: 'application_offer'
 ```
 
 ### For Virtual Machine Offer
 
 ```terminal
-uses: microsoft/microsoft-partner-center-github-action@v3
+uses: microsoft/microsoft-partner-center-github-action@v3.1
 with:
   offerId: offerId
   planId: planId
+  offerType: 'vm_image_offer'
+  imageVersionNumber: imageVersionNumber
+  osDiskSasUrl: osDiskSasUrl
+  dataDiskSasUrl: dataDiskSasUrl
+  imageType: imageType
+  operatingSystemFamily: operatingSystemFamily
+  operatingSystemType: operatingSystemType
   clientId: clientId
   secretValue: secretValue
   tenantId: tenantId
-  offerType: 'vm_image_offer'
-  imageVersionNumber: imageVersionNumber
-  imageType: imageType
-  osDiskSasUrl: osDiskSasUrl
-  dataDiskSasUrl: dataDiskSasUrl
-  operatingSystemFamily: operatingSystemFamily
-  operatingSystemType: operatingSystemType
 ```
