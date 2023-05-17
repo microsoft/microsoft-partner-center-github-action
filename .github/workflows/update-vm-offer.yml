@@ -52,10 +52,11 @@ jobs:
     steps:
       - name: Update offer artifact
         id: update-offer-artifact
-        uses: microsoft/microsoft-partner-center-action@v3
+        uses: microsoft/microsoft-partner-center-github-action@v3.1
         with:
           offerId: ${{ env.offerId }}
           planId: ${{ env.planId }}
+          offerType: ${{ env.offerType }}
           imageVersionNumber: ${{ env.imageVersionNumber }}
           osDiskSasUrl: ${{ env.osDiskSasUrl }}
           dataDiskSasUrl: ${{ env.dataDiskSasUrl }}
@@ -65,4 +66,4 @@ jobs:
           clientId: ${{ env.clientId }}
           secretValue: ${{ env.secretValue }}
           tenantId: ${{ env.tenantId }}
-          offerType: ${{ env.offerType }}
+          verbose: "true"
