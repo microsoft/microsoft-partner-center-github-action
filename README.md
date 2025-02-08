@@ -89,7 +89,7 @@ Here are the steps to get those credentials:
 ### For Application Offer
 
 ```terminal
-uses: microsoft/microsoft-partner-center-github-action@v3.1
+uses: microsoft/microsoft-partner-center-github-action@v3.2
 with:
   offerId: offerId
   planId: planId
@@ -104,7 +104,7 @@ with:
 ### For Virtual Machine Offer
 
 ```terminal
-uses: microsoft/microsoft-partner-center-github-action@v3.1
+uses: microsoft/microsoft-partner-center-github-action@v3.2
 with:
   offerId: offerId
   planId: planId
