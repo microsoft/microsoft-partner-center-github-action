@@ -415,8 +415,8 @@ vm_applend_new_draft_tech_configuration() {
         echo "debug: imageVersionsAppended: $imageVersionsAppended" >&2
     fi
 
-    # Put things together to form the reqeust data
-    requestData={\"\$schema\":\"https://product-ingestion.azureedge.net/schema/configure/2022-03-01-preview2\",\"resources\":[{\"\$schema\":\"https://product-ingestion.azureedge.net/schema/virtual-machine-plan-technical-configuration/2022-03-01-preview3\",\"product\":{\"externalId\":\"${offerId}\"},\"plan\":{\"externalId\":\"${planId}\"},\"operatingSystem\":{\"family\":\"${operatingSystemFamily}\",\"type\":\"${operatingSystemType}\"},\"skus\":[{\"imageType\":\"${imageType}\",\"skuId\":\"${planId}\"}],\"vmImageVersions\":${imageVersionsAppended}}]}
+    # Put things together to form the request data
+    requestData={\"\$schema\":\"https://schema.mp.microsoft.com/schema/configure/2022-03-01-preview2\",\"resources\":[{\"\$schema\":\"https://schema.mp.microsoft.com/schema/virtual-machine-plan-technical-configuration/2022-03-01-preview3\",\"product\":{\"externalId\":\"${offerId}\"},\"plan\":{\"externalId\":\"${planId}\"},\"operatingSystem\":{\"family\":\"${operatingSystemFamily}\",\"type\":\"${operatingSystemType}\"},\"skus\":[{\"imageType\":\"${imageType}\",\"skuId\":\"${planId}\"}],\"vmImageVersions\":${imageVersionsAppended}}]}
 
     if [ $verbose == 0 ]; then
         echo "debug: requestData: $requestData" >&2
