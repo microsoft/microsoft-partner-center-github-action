@@ -400,7 +400,7 @@ vm_get_all_current_all_image_versions() {
     fi
 }
 
-vm_applend_new_draft_tech_configuration() {
+vm_append_new_draft_tech_configuration() {
     echo "Start updating technical configurations."
     # Mark existing draft as delete
 
@@ -519,7 +519,7 @@ elif [ $offerType == "vm_image_offer" ]; then
 
     vm_get_all_current_all_image_versions
 
-    vm_applend_new_draft_tech_configuration
+    vm_append_new_draft_tech_configuration
 
     vm_check_configuration_status
 else
