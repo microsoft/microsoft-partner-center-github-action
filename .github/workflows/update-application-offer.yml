@@ -34,7 +34,7 @@ jobs:
     steps:
       - name: Update offer artifact
         id: update-offer-artifact
-        uses: microsoft/microsoft-partner-center-github-action@v3.2
+        uses: microsoft/microsoft-partner-center-github-action@b402ec775c80de83465100e6834946f997e45ca2 # v3.2
         with:
           offerId: ${{ env.offerId }}
           planId: ${{ env.planId }}
