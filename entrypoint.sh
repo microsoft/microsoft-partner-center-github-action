@@ -305,20 +305,17 @@ application_get_package_draft_config() {
 # Change update package reference
 application_generateUpdatePackageReferenceRequestBody()
 {
-    cat <<EOF
-{
-    "resourceType": "AzureSolutionTemplatePackageConfiguration",
-    "version": "${artifactVersion}",
-    "packageReferences": [
-        {
+    echo "$configuration" | jq --arg v "$artifactVersion" --arg pkg "$packageId" '
+      .version = $v
+      | .packageReferences = [
+          {
             "type": "AzureApplicationPackage",
-            "value": "${packageId}"
-        }
-    ],
-    "id": "${configurationId}"
+            "value": $pkg
+          }
+        ]
+    '
 }
-EOF
-}
+
 
 # Update package reference
 application_update_package_reference() {
