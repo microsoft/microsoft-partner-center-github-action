@@ -34,61 +34,29 @@ validate_status() {
 
 ############ Application Offer methods start #################
 
-# Get product by name
+# Get product by name.
+# NOTE: GET /v1.0/ingestion/products returns an empty list for products
+# migrated to the new Product Ingestion backend, so the legacy paging +
+# externalIDs filter never matches. Use the Graph externalId endpoint,
+# which works for both migrated and non-migrated products.
 application_get_product_id() {
-    echo "curl --fail -X GET \
-    https://api.partner.microsoft.com/v1.0/ingestion/products \
-    -H \"Authorization: Bearer ${token}\" \
-    -H \"accept: application/json\""
+    graphTokenJson=$(curl -sS -X POST -H "Content-Type: application/x-www-form-urlencoded" \
+        -d "grant_type=client_credentials&client_id=${clientId}&client_secret=${secretValue}&resource=https://graph.microsoft.com" \
+        "https://login.microsoftonline.com/${tenantId}/oauth2/token")
+    graphToken=$(echo "${graphTokenJson}" | jq -r '.access_token')
 
-    productsOutput=$(curl --fail -X GET \
-    https://api.partner.microsoft.com/v1.0/ingestion/products \
-    -H "Authorization: Bearer ${token}" \
-    -H "accept: application/json")
+    productJson=$(curl -sS --fail -X GET \
+        "https://graph.microsoft.com/rp/product-ingestion/product?externalId=${offerId}" \
+        -H "Authorization: Bearer ${graphToken}")
+    validate_status "Graph GET product?externalId=${offerId}"
 
-    validate_status "Get offer list"
+    # Graph returns id as "product/<guid>"; legacy URLs use the bare guid.
+    productId=$(echo "${productJson}" | jq -r '.value[0].id' | sed 's|^product/||')
 
-    products=$(echo $productsOutput | jq .)
-    echo "first page of offers:" >&2
-    echo $products | jq . >&2
-
-    nextProductsLink=$(echo ${products} | jq -r '.nextLink')
-    productId=$(echo ${products} | jq -r --arg offerId "$offerId" '.value[] | select(.externalIDs[].value == $offerId) | .id')
-
-    echo "offer finding result in first page: " $nextProductsLink $productId >&2
-
-    # if cannot find name and has nextLink, try next 
-    attempt=0
-    while [ -z ${productId} ] && [ ! -z "${nextProductsLink}" ] && [ $attempt -le 10 ]; do
-        echo https://api.partner.microsoft.com/${nextProductsLink}
-
-        productsOutput=$(curl --fail -X GET \
-        https://api.partner.microsoft.com/"${nextProductsLink}" \
-        -H "Authorization: Bearer ${token}" \
-        -H "accept: application/json")
-
-        validate_status "Get offer list"
-
-        products=$(echo $productsOutput | jq .)
-        echo "next page of offers:" >&2
-        echo $products | jq . >&2
-        
-        nextProductsLink=$(echo ${products} | jq -r '.nextLink')
-        productId=$(echo ${products} | jq -r --arg offerId "$offerId" '.value[] | select(.externalIDs[].value == $offerId) | .id')
-
-        echo "offer finding result in next page: " $nextProductsLink $productId >&2
-
-        attempt=$((attempt+1))
-        sleep 10s
-    done
-
-    # if cannot find productId by product name, exit 1
-    if [ -z ${productId} ]; then
-        echo "Error: cannot get offer by name" >&2
+    if [ -z "${productId}" ] || [ "${productId}" = "null" ]; then
+        echo "Error: product not found in Graph for externalId=${offerId}" >&2
         exit 1
     fi
-
-    echo "productId is: " $productId
 }
 
 # Get variantId by plan name
@@ -302,22 +270,18 @@ application_get_package_draft_config() {
     dataEtag=$(echo $packageConfiguration | jq -r '.value[0] | .["@odata.etag"]')
 }
 
-# Change update package reference
+# Change update package reference.
+# NOTE: resourceType must match the server-assigned value on the draft
+# (e.g. AzureApplicationPackageConfiguration vs AzureSolutionTemplate...).
+# Hardcoding a single value caused a 400 for products whose draft
+# returned a different resourceType. Patch only version and
+# packageReferences on the draft JSON fetched in
+# application_get_package_draft_config.
 application_generateUpdatePackageReferenceRequestBody()
 {
-    cat <<EOF
-{
-    "resourceType": "AzureSolutionTemplatePackageConfiguration",
-    "version": "${artifactVersion}",
-    "packageReferences": [
-        {
-            "type": "AzureApplicationPackage",
-            "value": "${packageId}"
-        }
-    ],
-    "id": "${configurationId}"
-}
-EOF
+    echo "$configuration" | jq --arg v "$artifactVersion" --arg pkg "$packageId" \
+        '.version = $v
+         | .packageReferences = [{"type": "AzureApplicationPackage", "value": $pkg}]'
 }
 
 # Update package reference
